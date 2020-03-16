@@ -1,25 +1,25 @@
 module.exports = app => {
-  const express = require("express")
-  const assert = require("http-assert")
-  const jwt = require("jsonwebtoken")
-  const AdminUser = require("../../models/AdminUser")
+  const express = require('express')
+  const assert = require('http-assert')
+  const jwt = require('jsonwebtoken')
+  const AdminUser = require('../../models/AdminUser')
 
   const router = express.Router({
     mergeParams: true
   })
 
   // 新增分类
-  router.post("/", async (req, res) => {
+  router.post('/', async (req, res) => {
     const model = await req.Model.create(req.body)
     res.send(model)
   })
 
   // 获取分类列表
   // TODO 分页
-  router.get("/", async (req, res) => {
+  router.get('/', async (req, res) => {
     const queryOptions = {}
-    if (req.Model.modelName === "Category") {
-      queryOptions.populate = "parent"
+    if (req.Model.modelName === 'Category') {
+      queryOptions.populate = 'parent'
     }
     const items = await req.Model.find()
       .setOptions(queryOptions)
@@ -28,19 +28,19 @@ module.exports = app => {
   })
 
   // 获取分类信息
-  router.get("/:id", async (req, res) => {
+  router.get('/:id', async (req, res) => {
     const model = await req.Model.findById(req.params.id)
     res.send(model)
   })
 
   // 修改分类信息
-  router.put("/:id", async (req, res) => {
+  router.put('/:id', async (req, res) => {
     const model = await req.Model.findByIdAndUpdate(req.params.id, req.body)
     res.send(model)
   })
 
   // 删除分类
-  router.delete("/:id", async (req, res) => {
+  router.delete('/:id', async (req, res) => {
     await req.Model.findByIdAndRemove(req.params.id, req.body)
     res.send({
       success: true
@@ -48,34 +48,34 @@ module.exports = app => {
   })
 
   // 登录校验中间件
-  const authMiddleware = require("../../middleware/auth")
-  const resourceMiddleware = require("../../middleware/resource")
+  const authMiddleware = require('../../middleware/auth')
+  const resourceMiddleware = require('../../middleware/resource')
 
-  app.use("/admin/api/rest/:resource", authMiddleware(), resourceMiddleware(), router)
+  app.use('/admin/api/rest/:resource', authMiddleware(), resourceMiddleware(), router)
 
   // 图片上传接口
-  const multer = require("multer")
-  const upload = multer({ dest: __dirname + "/../../uploads" })
-  app.post("/admin/api/upload", authMiddleware(), upload.single("file"), async (req, res) => {
+  const multer = require('multer')
+  const upload = multer({ dest: __dirname + '/../../uploads' })
+  app.post('/admin/api/upload', authMiddleware(), upload.single('file'), async (req, res) => {
     const file = req.file
-    file.url = `http://localhost:4000/uploads/${file.filename}`
+    file.url = `http://test.mattchen.site/uploads/${file.filename}`
     res.send(file)
   })
 
   // 登录接口
-  app.post("/admin/api/login", async (req, res) => {
+  app.post('/admin/api/login', async (req, res) => {
     const { username, password } = req.body
 
     // 1.根据用户名找用户
-    const user = await AdminUser.findOne({ username }).select("+password")
-    assert(user, 422, "用户不存在")
+    const user = await AdminUser.findOne({ username }).select('+password')
+    assert(user, 422, '用户不存在')
 
     // 2.校验密码
-    const isValid = require("bcrypt").compareSync(password, user.password)
-    assert(isValid, 422, "密码错误")
+    const isValid = require('bcrypt').compareSync(password, user.password)
+    assert(isValid, 422, '密码错误')
 
     // 3.返回token
-    const token = jwt.sign({ id: user._id }, app.get("secret"))
+    const token = jwt.sign({ id: user._id }, app.get('secret'))
     res.send({ token })
   })
 
