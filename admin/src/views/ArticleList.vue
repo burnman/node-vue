@@ -17,6 +17,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination background layout="pager" :hide-on-single-page="true" :total="totalCount" :page-size="size" @current-change="handleCurrentChange" :current-page.sync="currentPage"> </el-pagination>
   </div>
 </template>
 
@@ -24,27 +25,40 @@
 export default {
   data() {
     return {
-      items: []
+      items: [],
+      totalCount: 0,
+      size: 10,
+      currentPage: 1
     }
   },
   created() {
     this.fetch()
   },
   methods: {
+    handleCurrentChange(val) {
+      this.currentPage = val
+      this.fetch()
+    },
     async fetch() {
-      const res = await this.$http.get("rest/articles")
-      this.items = res.data
+      const res = await this.$http.get('rest/articles', {
+        params: {
+          pageSize: this.size,
+          currentPage: this.currentPage
+        }
+      })
+      this.items = res.data.list
+      this.totalCount = res.data.totalCount
     },
     remove(row) {
-      this.$confirm(`是否确定要删除文章 "${row.title}"`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
+      this.$confirm(`是否确定要删除文章 "${row.title}"`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(async () => {
         const res = await this.$http.delete(`rest/articles/${row._id}`)
         this.$message({
-          type: "success",
-          message: "删除成功!"
+          type: 'success',
+          message: '删除成功!'
         })
         this.fetch()
       })

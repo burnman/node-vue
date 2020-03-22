@@ -15,16 +15,38 @@ module.exports = app => {
   })
 
   // 获取分类列表
-  // TODO 分页
-  router.get('/', async (req, res) => {
+  router.get('/', (req, res) => {
+    let limit = req.query.pageSize || 10 //分页参数
+    let currentPage = req.query.currentPage || 1 //当前页码
+    if (currentPage < 1) {
+      currentPage = 1
+    }
+
     const queryOptions = {}
     if (req.Model.modelName === 'Category') {
       queryOptions.populate = 'parent'
     }
-    const items = await req.Model.find()
-      .setOptions(queryOptions)
-      .limit(10)
-    res.send(items)
+
+    req.Model.find({}, (err, ress) => {
+      let count = ress.length
+      req.Model.find()
+        .setOptions(queryOptions)
+        .skip((parseInt(currentPage) - 1) * parseInt(limit))
+        .limit(parseInt(limit))
+        .exec((err, list) => {
+          return res.json({
+            page: currentPage,
+            size: limit,
+            totalCount: count,
+            list: list
+          })
+        })
+    })
+
+    // const items = await req.Model.find()
+    //   .setOptions(queryOptions)
+    //   .limit(10)
+    // res.send(items)
   })
 
   // 获取分类信息

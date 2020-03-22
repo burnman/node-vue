@@ -47,6 +47,7 @@ export default {
     afterUpload(res) {
       this.$set(this.model, 'thumbnail', res.url)
     },
+    // 富文本编辑器上传图片地址自定义
     async handleImageAdded(file, Editor, cursorLocation, resetUploader) {
       const formData = new FormData()
       formData.append('file', file)
