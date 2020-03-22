@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
   username: { type: String },
@@ -6,9 +6,10 @@ const schema = new mongoose.Schema({
     type: String,
     select: false,
     set(val) {
-      return require("bcrypt").hashSync(val, 10)
+      return require('bcrypt').hashSync(val, 10)
     }
-  }
+  },
+  avatar: { type: String }
 })
 
-module.exports = mongoose.model("AdminUser", schema)
+module.exports = mongoose.model('AdminUser', schema)
